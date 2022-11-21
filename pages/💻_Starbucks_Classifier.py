@@ -39,7 +39,7 @@ data = load_data()
 all_clusters = data["Cluster_Names"].unique()
 
 def update_query_params():
-    State_selected = st.session_state["Cluster_Names"]
+    selected_cluster_names = st.session_state["Cluster_Names"]
     st.experimental_set_query_params(Cluster_Names=selected_cluster_names)
 
 with st.sidebar.form(key="my_form"):
@@ -47,33 +47,23 @@ with st.sidebar.form(key="my_form"):
 
     pressed = st.form_submit_button("Build Classifier Map")
 
-expander = st.sidebar.expander("What is this?")
-expander.write(
-    """
-This app allows users to view migration between states from 2018-2019.
-Overall US plots all states with substantial migration-based relationships with other states.
-Any other option plots only migration from or to a given state. This map will be updated
-to show migration between 2019 and 2020 once new census data comes out.
-Incoming: Shows for a given state, the percent of their **total inbound migration from** another state.
-Outgoing: Shows for a given state, the percent of their **total outbound migration to** another state.
-"""
-)
-
 if pressed:
     row1_1, row1_2 = st.columns((1, 1))
     with row1_1:
-        st.title("Starbucks Store Locator Dashboard")
+        st.title("Starbucks Store Clusters Dashboard")
 
     filterdata = filterdata(data, selected_cluster_names)
-    with row1_2:
-        st.write(
-            """
-        ##
-        The dashboard shows the distribution of current Starbucks locations.
-        By selecting the state on the left you can view the Starbucks store location in each state.
-        """
-        )
-
+    # with row1_2:
+    #     st.write(
+    #         """
+    #     ##
+    #     The dashboard shows the distribution of current Starbucks locations.
+    #     By selecting the state on the left you can view the Starbucks store location in each state.
+    #     """
+    #     )
+    st.write(
+        f"""The following map shows all clusters distribution:"""
+    )
     m = leafmap.Map(center=[40, -100], zoom=4)
     regions = 'https://raw.githubusercontent.com/giswqs/leafmap/master/examples/data/us_regions.geojson'
 
@@ -90,6 +80,9 @@ if pressed:
     )
     m.to_streamlit(height=500)
 
+    st.write(
+        f"""The following map shows **{selected_cluster_names}** distribution:"""
+    )
     m2 = leafmap.Map(center=[40, -100], zoom=4)
     regions = 'https://raw.githubusercontent.com/giswqs/leafmap/master/examples/data/us_regions.geojson'
 
