@@ -102,7 +102,7 @@ def update_query_params():
 with st.sidebar.form(key="my_form"):
     State_selected = st.selectbox("Select State", options=all_states, key="State")
 
-    pressed = st.form_submit_button("Build Migration Map")
+    pressed = st.form_submit_button("Build Map Dashboard")
 
 if pressed:
     with row1_1:
