@@ -1,7 +1,7 @@
 import streamlit as st
 import leafmap.foliumap as leafmap
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title="Starbucks_App_Overview", page_icon=":coffee:")
 
 st.sidebar.title("About")
 st.sidebar.info(
