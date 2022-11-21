@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+import leafmap.foliumap as leafmap
 
 # SETTING PAGE CONFIG TO WIDE MODE AND ADDING A TITLE AND FAVICON
 st.set_page_config(layout="wide", page_title="Starbucks Store Locator Dashboard", page_icon=":coffee:")
@@ -70,7 +71,6 @@ def filterdata(df, State_selected):
     df_tran = df.dropna(subset=['lon'])
     return df_tran[df_tran['State'] == State_selected]
 
-
 # CALCULATE MIDPOINT FOR GIVEN SET OF DATA
 @st.experimental_memo
 def mpoint(lon, lat):
@@ -86,20 +86,8 @@ def update_query_params():
     st.experimental_set_query_params(State=State_selected)
 
 with st.sidebar.form(key="my_form"):
-    selectbox_state = st.selectbox("Select State", options=all_states, key="State")
-    numberinput_threshold = st.number_input(
-        """Set top N Migration per state""",
-        value=3,
-        min_value=1,
-        max_value=25,
-        step=1,
-        format="%i",
-    )
+    State_selected = st.selectbox("Select State", options=all_states, key="State")
 
-    st.markdown(
-        '<p class="small-font">Results Limited to top 5 per State in overall US</p>',
-        unsafe_allow_html=True,
-    )
     pressed = st.form_submit_button("Build Migration Map")
 
 expander = st.sidebar.expander("What is this?")
@@ -113,3 +101,43 @@ Incoming: Shows for a given state, the percent of their **total inbound migratio
 Outgoing: Shows for a given state, the percent of their **total outbound migration to** another state.
 """
 )
+
+if pressed:
+    row1_1, row1_2 = st.columns((1, 1))
+    with row1_1:
+        st.title("Starbucks Store Locator Dashboard")
+
+    filterdata = filterdata(data, State_selected)
+    with row1_2:
+        st.write(
+            """
+        ##
+        The dashboard shows the distribution of current Starbucks locations.
+        By selecting the state on the left you can view the Starbucks store location in each state.
+        """
+        )
+    # row2_1, row2_2 = st.columns((1, 1))
+    # midpoint = mpoint(filterdata["lon"], filterdata["lat"])
+    # allpoint = mpoint(data["lon"], data["lat"])
+    # with row1_1:
+    #     st.write(
+    #         f"""**{State_selected}**"""
+    #     )
+    #     map(filterdata, midpoint[0], midpoint[1], 6)
+
+    # with row1_2:
+    m = leafmap.Map(center=[40, -100], zoom=4)
+    cities = 'https://raw.githubusercontent.com/Grace-NU-git/MSDS498/main/county_clustering.csv'
+    regions = 'https://raw.githubusercontent.com/giswqs/leafmap/master/examples/data/us_regions.geojson'
+
+    m.add_geojson(regions, layer_name='US Regions')
+    m.add_points_from_xy(
+        cities,
+        x="Longitude",
+        y="Latitude",
+        color_column='Cluster_Names',
+        icon_names=['gear', 'map', 'leaf', 'globe'],
+        spin=True,
+        add_legend=True,
+    )
+    m.to_streamlit(height=700)
