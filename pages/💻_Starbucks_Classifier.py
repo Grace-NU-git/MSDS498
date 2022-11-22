@@ -48,19 +48,8 @@ with st.sidebar.form(key="my_form"):
     pressed = st.form_submit_button("Build Classifier Map")
 
 if pressed:
-    row1_1, row1_2 = st.columns((1, 1))
-    with row1_1:
-        st.title("Starbucks Store Clusters Dashboard")
-
+    st.title("Starbucks Store Clusters Dashboard")
     filterdata = filterdata(data, selected_cluster_names)
-    # with row1_2:
-    #     st.write(
-    #         """
-    #     ##
-    #     The dashboard shows the distribution of current Starbucks locations.
-    #     By selecting the state on the left you can view the Starbucks store location in each state.
-    #     """
-    #     )
     st.write(
         f"""The following map shows all clusters distribution:"""
     )
