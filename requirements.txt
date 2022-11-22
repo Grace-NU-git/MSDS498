@@ -6,3 +6,4 @@ altair
 numpy
 pandas
 pandas
+plotly

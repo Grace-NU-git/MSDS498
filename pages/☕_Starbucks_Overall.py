@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pydeck as pdk
 import streamlit as st
+import plotly.express as px
 
 # SETTING PAGE CONFIG TO WIDE MODE AND ADDING A TITLE AND FAVICON
 st.set_page_config(layout="wide", page_title="Starbucks Store Locator Dashboard", page_icon=":coffee:")
@@ -14,13 +15,17 @@ def load_data():
         "Final_Counties_Starbucks_dataset.csv",
         nrows=100000,
         names=[
+            "County",
             "State",
+            "Starbucks_Ownership_Type",
+            "Street Address",
+            "City",
             "lon",
             "lat",
             "Starbucks_INDICATOR",
         ],  # specify names directly since they don't change
         skiprows=1,  # don't read header since names specified directly
-        usecols=[2,43,44,45],
+        usecols=[1,2,38,40,41,43,44,45],
     )
 
     return data
@@ -125,6 +130,8 @@ if pressed:
     midpoint = mpoint(filterdata["lon"],filterdata["lat"])
     allpoint = mpoint(data["lon"],data["lat"])
 
+    df2 = filterdata.groupby(['County']).size().reset_index(name='Counts')
+
     with row2_1:
         st.write("**United States Data**")
         # map(data, allpoint[0], allpoint[1], 4)
@@ -134,3 +141,20 @@ if pressed:
             f"""**{State_selected}**"""
         )
         map(filterdata, midpoint[0], midpoint[1], 6)
+
+    row3_1,row3_2 = st.columns((1,0.00001))
+
+    fig = px.bar(df2, x='County', y='Counts', color="Counts",
+                 template='seaborn', color_continuous_scale=px.colors.diverging.Temps)
+
+    fig.add_scatter(x=df2['County'], y=df2['Counts'], mode='lines', line=dict(color="light grey"),
+                    name='Counts')
+
+    fig.update_layout(title_text="The Counts of Store by County", title_x=0,
+                      margin=dict(l=0, r=10, b=10, t=30), yaxis_title=None, xaxis_title=None,
+                      legend=dict(orientation="h", yanchor="bottom", y=0.9, xanchor="right", x=0.99))
+
+    row3_1.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("See List of Store Locations in Selected State"):
+        st.write(filterdata[["Starbucks_Ownership_Type", "Street Address", "City","County","State"]])
